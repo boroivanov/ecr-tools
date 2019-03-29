@@ -16,7 +16,7 @@ requirements = [
 
 setup(
     name="ecrtools",
-    version="0.0.0",
+    version="0.0.1",
     url="https://github.com/boroivanov/ecr-tools",
 
     author='Borislav Ivanov',
