@@ -4,7 +4,7 @@ import click
 @click.command()
 @click.argument('names', required=False, nargs=-1)
 @click.pass_context
-def ls(ctx, names):
+def repos(ctx, names):
     '''List repos'''
     params = {}
     if len(names):
