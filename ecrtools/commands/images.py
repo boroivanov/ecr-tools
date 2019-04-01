@@ -17,11 +17,17 @@ def images(ctx, repo, image, count, exact_match):
     images = get_images(ctx, repo, image_ids)
     images = sorted(images, reverse=True, key=lambda k: k['imagePushedAt'])
 
+    total_size = 0
     for i in images[:count]:
         tags = ', '.join(i['imageTags'])
+        total_size += i['imageSizeInBytes']
         size = convert_bytes(i['imageSizeInBytes'], 'MB')
-        click.echo(f'{i["imagePushedAt"]}  {size["value"]:.2f}{size["metric"]}'
+        click.echo(f'{i["imagePushedAt"]}  {size["value"]:.1f}{size["units"]}'
                    f'  {tags}')
+
+    total_size = convert_bytes(total_size, 'GB')
+    click.echo(f'\nimages: {len(images[:count])}'
+               f' total size: {total_size["value"]:.1f}{total_size["units"]}')
 
 
 def get_image_ids(ctx, repo, image, exact_match):
@@ -47,13 +53,13 @@ def get_images(ctx, repo, images_ids):
     return describe_images(ctx, params)
 
 
-def convert_bytes(n, metric='MB'):
-    if metric == 'GB':
-        return {'value': n / 1000 / 1000 / 1000, 'metric': 'GB'}
-    elif metric == 'MB':
-        return {'value': n / 1000 / 1000 / 1000, 'metric': 'MB'}
+def convert_bytes(n, units='B'):
+    if units == 'GB':
+        return {'value': n / 1000 / 1000 / 1000, 'units': 'GB'}
+    elif units == 'MB':
+        return {'value': n / 1000 / 1000, 'units': 'MB'}
     else:
-        return {'value': n, 'metric': 'B'}
+        return {'value': n, 'units': 'B'}
 
 
 def list_images(ctx, params={}):
