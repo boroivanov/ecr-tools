@@ -11,7 +11,7 @@ def repos(ctx, names):
         params['repositoryNames'] = [name for name in names]
 
     repos = describe_repositories(ctx, params)
-    print('\n'.join(sorted([r['repositoryName'] for r in repos])))
+    click.echo('\n'.join(sorted([r['repositoryName'] for r in repos])))
 
 
 def describe_repositories(ctx, params={}):

@@ -18,8 +18,8 @@ def images(ctx, repo, image):
     }
 
     images = list_images(ctx, params)
-    print('\n'.join(sorted([img['imageTag'] for img in images
-                            if image in img['imageTag']])))
+    click.echo('\n'.join(sorted([img['imageTag'] for img in images
+                                 if image in img['imageTag']])))
 
 
 def list_images(ctx, params={}):
