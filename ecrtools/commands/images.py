@@ -6,8 +6,9 @@ from botocore.exceptions import ClientError
 @click.command()
 @click.argument('repo')
 @click.argument('image', default='', type=str, required=False)
+@click.option('-w', '--exact-match', is_flag=True, help='Exact match')
 @click.pass_context
-def images(ctx, repo, image):
+def images(ctx, repo, image, exact_match):
     '''List images in a repo'''
     params = {
         'repositoryName': repo,
@@ -18,6 +19,8 @@ def images(ctx, repo, image):
     }
 
     images = list_images(ctx, params)
+    if exact_match:
+        images = [i for i in images if image == i['imageTag']]
     click.echo('\n'.join(sorted([img['imageTag'] for img in images
                                  if image in img['imageTag']])))
 
