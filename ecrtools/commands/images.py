@@ -6,15 +6,18 @@ from botocore.exceptions import ClientError
 @click.command()
 @click.argument('repo')
 @click.argument('image', default='', type=str, required=False)
+@click.option('-c', '--count', type=int, default=None,
+              help='Number of images to list')
 @click.option('-w', '--exact-match', is_flag=True, help='Exact match')
 @click.pass_context
-def images(ctx, repo, image, exact_match):
+def images(ctx, repo, image, count, exact_match):
     '''List images in a repo'''
 
     image_ids = get_image_ids(ctx, repo, image, exact_match)
     images = get_images(ctx, repo, image_ids)
+    images = sorted(images, reverse=True, key=lambda k: k['imagePushedAt'])
 
-    for i in images:
+    for i in images[:count]:
         tags = ', '.join(i['imageTags'])
         size = convert_bytes(i['imageSizeInBytes'], 'MB')
         click.echo(f'{i["imagePushedAt"]}  {size["value"]:.2f}{size["metric"]}'
