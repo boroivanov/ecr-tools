@@ -5,7 +5,7 @@ from botocore.exceptions import ClientError
 
 
 class Ecr(object):
-    def __init__(self, client, repo):
+    def __init__(self, client, repo=None):
         self.client = client
         self.repo = repo
 
@@ -74,4 +74,26 @@ class Ecr(object):
                 sys.exit(1)
                 click.exit('Repository not found.')
             repos += response['imageDetails']
+        return repos
+
+    def describe_repositories(self, params={}):
+        response = None
+        repos = []
+        while True:
+            if response:
+                if 'NextMarker' not in response:
+                    break
+                else:
+                    params['nextToken'] = response['NextMarker']
+            try:
+                response = self.client.describe_repositories(**params)
+            except ClientError as e:
+                e_code = 'RepositoryNotFoundException'
+                if e.response['Error']['Code'] == e_code:
+                    click.echo('Repository not found.', err=True)
+                else:
+                    click.echo(e, err=True)
+                sys.exit(1)
+                click.exit('Repository not found.')
+            repos += response['repositories']
         return repos
