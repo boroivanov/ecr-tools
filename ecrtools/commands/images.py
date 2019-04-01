@@ -1,6 +1,7 @@
-import sys
 import click
-from botocore.exceptions import ClientError
+
+from ecrtools.lib.ecr import Ecr
+from ecrtools.lib.utils import convert_bytes
 
 
 @click.command()
@@ -15,8 +16,9 @@ from botocore.exceptions import ClientError
 def images(ctx, repo, image, count, units, exact_match):
     '''List images in a repo'''
 
-    image_ids = get_image_ids(ctx, repo, image, exact_match)
-    images = get_images(ctx, repo, image_ids)
+    ecr = Ecr(ctx.obj['ecr'], repo)
+    image_ids = ecr.get_image_ids(image, exact_match)
+    images = ecr.get_images(image_ids)
     images = sorted(images, reverse=True, key=lambda k: k['imagePushedAt'])
 
     total_size = 0
@@ -36,80 +38,3 @@ def images(ctx, repo, image, count, units, exact_match):
     click.echo(f'\nimages: {len(images[:count])}'
                f' untagged: {total_untagged}'
                f' total size: {total_size["value"]:.1f}{total_size["units"]}')
-
-
-def get_image_ids(ctx, repo, image, exact_match):
-    params = {
-        'repositoryName': repo,
-        'maxResults': 100,
-        'filter': {
-            'tagStatus': 'ANY'
-        },
-    }
-    images_ids = list_images(ctx, params)
-
-    if exact_match:
-        return [i for i in images_ids
-                if image == i.get('imageTag', '<untagged>')]
-    return [i for i in images_ids if image in i.get('imageTag', '<untagged>')]
-
-
-def get_images(ctx, repo, images_ids):
-    params = {
-        'repositoryName': repo,
-        'imageIds': images_ids
-    }
-    return describe_images(ctx, params)
-
-
-def convert_bytes(n, units='B'):
-    if units == 'GB':
-        return {'value': n / 1000 / 1000 / 1000, 'units': 'GB'}
-    elif units == 'MB':
-        return {'value': n / 1000 / 1000, 'units': 'MB'}
-    else:
-        return {'value': n, 'units': 'B'}
-
-
-def list_images(ctx, params={}):
-    response = None
-    repos = []
-    while True:
-        if response:
-            if 'NextMarker' not in response:
-                break
-            else:
-                params['nextToken'] = response['NextMarker']
-        try:
-            response = ctx.obj['ecr'].list_images(**params)
-        except ClientError as e:
-            if e.response['Error']['Code'] == 'RepositoryNotFoundException':
-                click.echo('Repository not found.', err=True)
-            else:
-                click.echo(e, err=True)
-            sys.exit(1)
-            click.exit('Repository not found.')
-        repos += response['imageIds']
-    return repos
-
-
-def describe_images(ctx, params={}):
-    response = None
-    repos = []
-    while True:
-        if response:
-            if 'NextMarker' not in response:
-                break
-            else:
-                params['nextToken'] = response['NextMarker']
-        try:
-            response = ctx.obj['ecr'].describe_images(**params)
-        except ClientError as e:
-            if e.response['Error']['Code'] == 'RepositoryNotFoundException':
-                click.echo('Repository not found.', err=True)
-            else:
-                click.echo(e, err=True)
-            sys.exit(1)
-            click.exit('Repository not found.')
-        repos += response['imageDetails']
-    return repos
