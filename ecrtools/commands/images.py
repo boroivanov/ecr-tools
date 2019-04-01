@@ -20,8 +20,13 @@ def images(ctx, repo, image, count, units, exact_match):
     images = sorted(images, reverse=True, key=lambda k: k['imagePushedAt'])
 
     total_size = 0
+    total_untagged = 0
     for i in images[:count]:
-        tags = ', '.join(i['imageTags'])
+        try:
+            tags = ', '.join(i['imageTags'])
+        except KeyError:
+            tags = '<untagged>'
+            total_untagged += 1
         total_size += i['imageSizeInBytes']
         size = convert_bytes(i['imageSizeInBytes'], units)
         click.echo(f'{i["imagePushedAt"]}  {size["value"]:.1f}{size["units"]}'
@@ -29,6 +34,7 @@ def images(ctx, repo, image, count, units, exact_match):
 
     total_size = convert_bytes(total_size, 'GB')
     click.echo(f'\nimages: {len(images[:count])}'
+               f' untagged: {total_untagged}'
                f' total size: {total_size["value"]:.1f}{total_size["units"]}')
 
 
@@ -43,8 +49,9 @@ def get_image_ids(ctx, repo, image, exact_match):
     images_ids = list_images(ctx, params)
 
     if exact_match:
-        return [i for i in images_ids if image == i['imageTag']]
-    return [i for i in images_ids if image in i['imageTag']]
+        return [i for i in images_ids
+                if image == i.get('imageTag', '<untagged>')]
+    return [i for i in images_ids if image in i.get('imageTag', '<untagged>')]
 
 
 def get_images(ctx, repo, images_ids):
