@@ -9,7 +9,8 @@ from ecrtools.lib.utils import convert_bytes
 
 @click.command()
 @click.argument('names', required=False, nargs=-1)
-@click.option('-a', '--all_stats', is_flag=True, help='Print stats.')
+@click.option('-a', '--all_stats', is_flag=True, default=True,
+              help='Toggle stats (Default: True).')
 @click.pass_context
 def repos(ctx, names, all_stats):
     '''List repos'''
