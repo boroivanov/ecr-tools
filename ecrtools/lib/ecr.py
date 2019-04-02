@@ -1,7 +1,36 @@
 import sys
 import click
+import functools
 
 from botocore.exceptions import ClientError
+
+
+def ecr_api_call(key, error_code='RepositoryNotFoundException',
+                 error_message='Repository not found.'):
+    def ecr_api_call_decorator(func):
+        @functools.wraps(func)
+        def wrapper_decorator(*args, **kwargs):
+            response = None
+            repos = []
+            while True:
+                if response:
+                    if 'NextMarker' not in response:
+                        break
+                    else:
+                        kwargs['nextToken'] = response['NextMarker']
+                try:
+                    response = func(*args, **kwargs)
+                except ClientError as e:
+                    if e.response['Error']['Code'] == error_code:
+                        click.echo(error_message, err=True)
+                    else:
+                        click.echo(e, err=True)
+                    sys.exit(1)
+                    click.exit(error_message)
+                repos += response[key]
+            return repos
+        return wrapper_decorator
+    return ecr_api_call_decorator
 
 
 class Ecr(object):
@@ -32,68 +61,14 @@ class Ecr(object):
         }
         return self.describe_images(params)
 
-    def list_images(self, params={}):
-        response = None
-        repos = []
-        while True:
-            if response:
-                if 'NextMarker' not in response:
-                    break
-                else:
-                    params['nextToken'] = response['NextMarker']
-            try:
-                response = self.client.list_images(**params)
-            except ClientError as e:
-                e_code = 'RepositoryNotFoundException'
-                if e.response['Error']['Code'] == e_code:
-                    click.echo('Repository not found.', err=True)
-                else:
-                    click.echo(e, err=True)
-                sys.exit(1)
-                click.exit('Repository not found.')
-            repos += response['imageIds']
-        return repos
+    @ecr_api_call('imageIds')
+    def list_images(self, params):
+        return self.client.list_images(**params)
 
-    def describe_images(self, params={}):
-        response = None
-        repos = []
-        while True:
-            if response:
-                if 'NextMarker' not in response:
-                    break
-                else:
-                    params['nextToken'] = response['NextMarker']
-            try:
-                response = self.client.describe_images(**params)
-            except ClientError as e:
-                e_code = 'RepositoryNotFoundException'
-                if e.response['Error']['Code'] == e_code:
-                    click.echo('Repository not found.', err=True)
-                else:
-                    click.echo(e, err=True)
-                sys.exit(1)
-                click.exit('Repository not found.')
-            repos += response['imageDetails']
-        return repos
+    @ecr_api_call('imageDetails')
+    def describe_images(self, params):
+        return self.client.describe_images(**params)
 
-    def describe_repositories(self, params={}):
-        response = None
-        repos = []
-        while True:
-            if response:
-                if 'NextMarker' not in response:
-                    break
-                else:
-                    params['nextToken'] = response['NextMarker']
-            try:
-                response = self.client.describe_repositories(**params)
-            except ClientError as e:
-                e_code = 'RepositoryNotFoundException'
-                if e.response['Error']['Code'] == e_code:
-                    click.echo('Repository not found.', err=True)
-                else:
-                    click.echo(e, err=True)
-                sys.exit(1)
-                click.exit('Repository not found.')
-            repos += response['repositories']
-        return repos
+    @ecr_api_call('repositories')
+    def describe_repositories(self, **params):
+        return self.client.describe_repositories(**params)

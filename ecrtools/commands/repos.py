@@ -20,7 +20,7 @@ def repos(ctx, names, all_stats):
     if len(names):
         params['repositoryNames'] = [name for name in names]
 
-    repos = ecr.describe_repositories(params)
+    repos = ecr.describe_repositories(**params)
 
     if not all_stats:
         click.echo('\n'.join(sorted([r['repositoryName'] for r in repos])))
