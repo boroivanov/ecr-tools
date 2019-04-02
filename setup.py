@@ -10,8 +10,6 @@ with io.open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 requirements = [
     'Click>=6.0',
     'boto3>=1.5.33',
-    'reprint>=0.5.1',
-    'configparser>=3.5.0'
 ]
 
 setup(
