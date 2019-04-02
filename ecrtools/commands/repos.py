@@ -37,10 +37,11 @@ def print_repo_stats(ctx, stats):
         total_size = 0
         total_untagged = 0
         click.echo(f"{repo['repositoryName']:{repo_name_pad}}", nl=False)
-        for image in repo['stats']:
-            if 'imageTags' not in image:
-                total_untagged += 1
-            total_size += image['imageSizeInBytes']
+        if repo['stats']:
+            for image in repo['stats']:
+                if 'imageTags' not in image:
+                    total_untagged += 1
+                total_size += image['imageSizeInBytes']
 
         total_size = convert_bytes(total_size, 'GB')
         click.echo(f'  images: {len(repo["stats"]):4}'
@@ -65,7 +66,12 @@ def bulk_repo_stats(ctx, repos):
 def get_repo_stats(ctx, repo, q):
     ecr = Ecr(ctx.obj['ecr'], repo['repositoryName'])
     image_ids = ecr.get_image_ids(image='', exact_match=False)
+
+    stats = []
+    if image_ids:
+        stats = ecr.get_images(image_ids)
+
     q.put({
         'repositoryName': repo['repositoryName'],
-        'stats': ecr.get_images(image_ids)}
-    )
+        'stats': stats,
+    })
