@@ -31,6 +31,7 @@ def repos(ctx, names, all_stats):
 
 def print_repo_stats(ctx, repos):
     stats = bulk_repo_stats(ctx, repos)
+    stats = sorted(stats, key=lambda x: x['repositoryName'])
 
     repo_name_pad = len(max([r['repositoryName'] for r in stats], key=len))
     for repo in stats:
@@ -43,9 +44,9 @@ def print_repo_stats(ctx, repos):
             total_size += image['imageSizeInBytes']
 
         total_size = convert_bytes(total_size, 'GB')
-        click.echo(f'  images: {len(repo)}'
-                   f' untagged: {total_untagged}'
-                   f' total size: {total_size["value"]:.1f}'
+        click.echo(f'  images: {len(repo["stats"]):4}'
+                   f'  untagged: {total_untagged:3}'
+                   f'  size: {total_size["value"]:.1f}'
                    f'{total_size["units"]}')
 
 
