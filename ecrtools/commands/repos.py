@@ -46,7 +46,7 @@ def print_repo_stats(ctx, repos):
         total_size = convert_bytes(total_size, 'GB')
         click.echo(f'  images: {len(repo["stats"]):4}'
                    f'  untagged: {total_untagged:3}'
-                   f'  size: {total_size["value"]:.1f}'
+                   f'  size: {total_size["value"]:5.1f}'
                    f'{total_size["units"]}')
 
 
