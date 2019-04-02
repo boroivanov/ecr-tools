@@ -26,13 +26,12 @@ def repos(ctx, names, all_stats):
         click.echo('\n'.join(sorted([r['repositoryName'] for r in repos])))
         sys.exit(0)
 
-    print_repo_stats(ctx, repos)
-
-
-def print_repo_stats(ctx, repos):
     stats = bulk_repo_stats(ctx, repos)
     stats = sorted(stats, key=lambda x: x['repositoryName'])
+    print_repo_stats(ctx, stats)
 
+
+def print_repo_stats(ctx, stats):
     repo_name_pad = len(max([r['repositoryName'] for r in stats], key=len))
     for repo in stats:
         total_size = 0
