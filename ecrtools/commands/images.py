@@ -23,7 +23,9 @@ def images(ctx, repo, image, count, units, exact_match):
 
     total_size = 0
     total_untagged = 0
-    for i in images[:count]:
+    size_pad = calculate_size_pad(images, units)
+
+    for i in images[: count]:
         try:
             tags = ', '.join(i['imageTags'])
         except KeyError:
@@ -31,10 +33,17 @@ def images(ctx, repo, image, count, units, exact_match):
             total_untagged += 1
         total_size += i['imageSizeInBytes']
         size = convert_bytes(i['imageSizeInBytes'], units)
-        click.echo(f'{i["imagePushedAt"]}  {size["value"]:.1f}{size["units"]}'
-                   f'  {tags}')
+        click.echo(f'{i["imagePushedAt"]}  {size["value"]:{size_pad}.1f}'
+                   f'{size["units"]}  {tags}')
 
     total_size = convert_bytes(total_size, 'GB')
     click.echo(f'\nimages: {len(images[:count])}'
                f' untagged: {total_untagged}'
                f' total size: {total_size["value"]:.1f}{total_size["units"]}')
+
+
+def calculate_size_pad(images, units):
+    s = max([str(convert_bytes(i['imageSizeInBytes'], units)['value'])
+             for i in images], key=len)
+    s = '{:.1f}'.format(float(s))
+    return len(f'{str(s)}')
