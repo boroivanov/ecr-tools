@@ -6,7 +6,7 @@ import string
 
 from botocore.exceptions import ProfileNotFound, NoRegionError
 
-version = '0.0.3'
+version = '0.0.4'
 
 
 class Subcommand(click.MultiCommand):
