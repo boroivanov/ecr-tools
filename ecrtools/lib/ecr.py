@@ -46,7 +46,7 @@ class Ecr(object):
                 'tagStatus': 'ANY'
             },
         }
-        images_ids = self.list_images(params)
+        images_ids = self.list_images(**params)
 
         if exact_match:
             return [i for i in images_ids
@@ -59,14 +59,14 @@ class Ecr(object):
             'repositoryName': self.repo,
             'imageIds': images_ids
         }
-        return self.describe_images(params)
+        return self.describe_images(**params)
 
     @ecr_api_call('imageIds')
-    def list_images(self, params):
+    def list_images(self, **params):
         return self.client.list_images(**params)
 
     @ecr_api_call('imageDetails')
-    def describe_images(self, params):
+    def describe_images(self, **params):
         return self.client.describe_images(**params)
 
     @ecr_api_call('repositories')
