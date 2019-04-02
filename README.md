@@ -4,4 +4,11 @@
 
 # ecrtools
 
-ecrtools is a small cli for listing ECR repos and searching for images in ECR.
+ecrtools is a small cli for listing ECR repos and searching for images in ECR. Easily print repos and images stats
+
+
+# Install
+*NOTE: Python 3 support only.*
+```
+pip install ecrtools
+```
