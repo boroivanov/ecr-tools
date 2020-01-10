@@ -1,7 +1,7 @@
-import sys
-import click
 import functools
+import sys
 
+import click
 from botocore.exceptions import ClientError
 
 
@@ -14,10 +14,10 @@ def ecr_api_call(key, error_code='RepositoryNotFoundException',
             repos = []
             while True:
                 if response:
-                    if 'NextMarker' not in response:
+                    if 'nextToken' not in response:
                         break
                     else:
-                        kwargs['nextToken'] = response['NextMarker']
+                        kwargs['nextToken'] = response['nextToken']
                 try:
                     response = func(*args, **kwargs)
                 except ClientError as e:
@@ -57,7 +57,13 @@ class Ecr(object):
     def get_images(self, images_ids):
         params = {
             'repositoryName': self.repo,
-            'imageIds': images_ids
+            'imageIds': images_ids,
+        }
+        return self.describe_images(**params)
+
+    def get_all_repo_images(self):
+        params = {
+            'repositoryName': self.repo,
         }
         return self.describe_images(**params)
 

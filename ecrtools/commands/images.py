@@ -1,4 +1,5 @@
 import sys
+
 import click
 
 from ecrtools.lib.ecr import Ecr
@@ -18,11 +19,14 @@ def images(ctx, repo, image, count, units, exact_match):
     '''List images in a repo'''
 
     ecr = Ecr(ctx.obj['ecr'], repo)
-    image_ids = ecr.get_image_ids(image, exact_match)
-    if not image_ids:
-        sys.exit('No images found.')
-    images = ecr.get_images(image_ids)
-    images = sorted(images, reverse=True, key=lambda k: k['imagePushedAt'])
+    if image == '':
+        images = ecr.get_all_repo_images()
+    else:
+        image_ids = ecr.get_image_ids(image, exact_match)
+        if not image_ids:
+            sys.exit('No images found.')
+        images = ecr.get_images(image_ids)
+        images = sorted(images, reverse=True, key=lambda k: k['imagePushedAt'])
 
     total_size = 0
     total_untagged = 0
