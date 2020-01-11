@@ -4,6 +4,8 @@ import sys
 import click
 from botocore.exceptions import ClientError
 
+from ecrtools.lib.utils import split_list
+
 
 def ecr_api_call(key, error_code='RepositoryNotFoundException',
                  error_message='Repository not found.'):
@@ -55,11 +57,19 @@ class Ecr(object):
                 if image in i.get('imageTag', '<untagged>')]
 
     def get_images(self, images_ids):
-        params = {
-            'repositoryName': self.repo,
-            'imageIds': images_ids,
-        }
-        return self.describe_images(**params)
+        image_descriptions = []
+        ids_chunks = split_list(images_ids)
+
+        for ids in ids_chunks:
+            # maxResults - This option cannot be used when you specify images
+            # with imageIds.
+            params = {
+                'repositoryName': self.repo,
+                'imageIds': ids,
+            }
+            image_descriptions += self.describe_images(**params)
+
+        return image_descriptions
 
     def get_all_repo_images(self):
         params = {
