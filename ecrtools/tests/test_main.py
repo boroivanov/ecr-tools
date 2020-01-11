@@ -12,13 +12,13 @@ class TestMain(object):
     def test_subcommands_listing(self, runner):
         result = runner.invoke(main.cli)
         assert result.exit_code == 0
-        subcommands = ['ls', 'find']
+        subcommands = ['repos', 'images']
         assert all(x in result.output for x in subcommands)
 
     def test_missing_profile(self, runner):
         result = runner.invoke(
             main.cli,
-            ['--profile', 'no-profile', 'ls']
+            ['--profile', 'no-profile', 'repos']
         )
         assert result.exit_code == 1
         expected = 'The config profile (no-profile) could not be found\n'
@@ -30,7 +30,7 @@ class TestMain(object):
         """
         result = runner.invoke(
             main.cli,
-            ['--profile', 'no-region', 'ls']
+            ['--profile', 'no-region', 'repos']
         )
         assert result.exit_code == 1
         expected = 'You must specify a region.\n'
