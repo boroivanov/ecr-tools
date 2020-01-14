@@ -1,7 +1,8 @@
-import sys
-import click
-import threading
 import queue
+import sys
+import threading
+
+import click
 
 from ecrtools.lib.ecr import Ecr
 from ecrtools.lib.utils import convert_bytes
@@ -11,11 +12,11 @@ from ecrtools.lib.utils import convert_bytes
 @click.argument('names', required=False, nargs=-1)
 @click.option('-a', '--all_stats', is_flag=True, default=True,
               help='Toggle stats (Default: True).')
-@click.pass_context
+@click.pass_obj
 def repos(ctx, names, all_stats):
     '''List repos'''
 
-    ecr = Ecr(ctx.obj['ecr'])
+    ecr = Ecr(ctx['ecr'])
     params = {}
     if len(names):
         params['repositoryNames'] = [name for name in names]
@@ -64,7 +65,7 @@ def bulk_repo_stats(ctx, repos):
 
 
 def get_repo_stats(ctx, repo, q):
-    ecr = Ecr(ctx.obj['ecr'], repo['repositoryName'])
+    ecr = Ecr(ctx['ecr'], repo['repositoryName'])
     image_ids = ecr.get_image_ids(image='', exact_match=False)
 
     stats = []

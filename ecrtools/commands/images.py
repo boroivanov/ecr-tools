@@ -14,11 +14,11 @@ from ecrtools.lib.utils import convert_bytes
 @click.option('-u', '--units', default='MB',
               type=click.Choice(['B', 'MB', 'GB']), help='Size units.')
 @click.option('-w', '--exact-match', is_flag=True, help='Exact match.')
-@click.pass_context
+@click.pass_obj
 def images(ctx, repo, image, count, units, exact_match):
     '''List images in a repo'''
 
-    ecr = Ecr(ctx.obj['ecr'], repo)
+    ecr = Ecr(ctx['ecr'], repo)
     if image == '':
         images = ecr.get_all_repo_images()
     else:
