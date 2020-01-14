@@ -1,10 +1,10 @@
 import os
+import string
 import sys
+
 import boto3
 import click
-import string
-
-from botocore.exceptions import ProfileNotFound, NoRegionError
+from botocore.exceptions import NoRegionError, ProfileNotFound
 
 version = '0.0.4'
 
@@ -52,11 +52,12 @@ def cli(ctx, region, profile):
         click.echo(e, err=True)
         sys.exit(1)
 
-    ctx.obj = {
-        'region': region,
-        'profile': profile,
-        'ecr': ecr,
-    }
+    if not ctx.obj:
+        ctx.obj = {
+            'region': region,
+            'profile': profile,
+            'ecr': ecr,
+        }
 
 
 if __name__ == '__main__':
