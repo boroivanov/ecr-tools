@@ -23,6 +23,9 @@ def repos(ctx, names, all_stats):
 
     repos = ecr.describe_repositories(**params)
 
+    if not repos:
+        sys.exit('No repositories found.')
+
     if not all_stats:
         click.echo('\n'.join(sorted([r['repositoryName'] for r in repos])))
         sys.exit(0)
