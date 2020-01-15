@@ -28,6 +28,9 @@ def images(ctx, repo, image, count, units, exact_match):
         images = ecr.get_images(image_ids)
         images = sorted(images, reverse=True, key=lambda k: k['imagePushedAt'])
 
+    if not images:
+        sys.exit('No images found.')
+
     total_size = 0
     total_untagged = 0
     size_pad = calculate_size_pad(images, units)
