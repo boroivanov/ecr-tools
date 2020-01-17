@@ -63,3 +63,79 @@ class TestRepos(object):
 
         assert result.exit_code == 0
         assert result.output == expected_result
+
+    def test_repos_single_with_stats(self, runner):
+        stubber.add_response('describe_repositories',
+                             sr.describe_repositories_single)
+
+        responses = {
+            'list': sr.list_images_repo01,
+            'desc': sr.describe_images_repo01,
+        }
+
+        self.stubber_image_stats('repo01', responses)
+
+        with stubber:
+            result = runner.invoke(main.cli, ['repos', 'repo01'],
+                                   obj=ctx)
+
+        expected_result = 'repo01  images:    3  untagged:   0  size:  12.3GB\n'
+
+        assert result.exit_code == 0
+        assert result.output == expected_result
+
+    def test_repos_multiple_with_stats(self, runner):
+        stubber.add_response('describe_repositories',
+                             sr.describe_repositories_single)
+
+        repos = {
+            'repo01': {
+                'list': sr.list_images_repo01,
+                'desc': sr.describe_images_repo01,
+            },
+            # 'repo02': {
+            #     'list': sr.list_images_repo02,
+            #     'desc': sr.describe_images_repo02,
+            # },
+            # 'repo03': {
+            #     'list': sr.list_images_repo03_empty,
+            #     'desc': sr.describe_images_repo03_empty,
+            # },
+        }
+
+        for k, v in repos.items():
+            self.stubber_image_stats(k, v)
+
+        with stubber:
+            result = runner.invoke(main.cli, ['repos'],
+                                   obj=ctx)
+
+        expected_result = 'repo01  images:    3  untagged:   0  size:  12.3GB\n'
+
+        assert result.exit_code == 0
+        assert result.output == expected_result
+
+    @staticmethod
+    def stubber_image_stats(repo, response):
+        # list images
+        expected_params = {
+            'repositoryName': repo,
+            'maxResults': 100,
+            'filter': {
+                'tagStatus': 'ANY'
+            },
+        }
+        stubber.add_response(
+            'list_images', response['list'],  expected_params)
+
+        # describe images
+        ids = [i for i in response['list']['imageIds']]
+        expected_params = {
+            'repositoryName': 'repo01',
+            'imageIds': ids,
+        }
+        imageDetails = [i for i in response['desc']['imageDetails']
+                        if 'imageTags' in i]
+        response = {'imageDetails': imageDetails}
+
+        stubber.add_response('describe_images', response,  expected_params)
