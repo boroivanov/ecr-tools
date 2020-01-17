@@ -27,8 +27,8 @@ def ecr_api_call(key, error_code='RepositoryNotFoundException',
                         click.echo(error_message, err=True)
                     else:
                         click.echo(e, err=True)
-                    sys.exit(1)
                     click.exit(error_message)
+                    sys.exit(1)
                 repos += response[key]
             return repos
         return wrapper_decorator

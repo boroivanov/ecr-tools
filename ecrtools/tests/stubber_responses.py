@@ -141,7 +141,7 @@ describe_images_repo01 = {
                 '2.0',
                 'develop',
             ],
-            'imageSizeInBytes': 40960000,
+            'imageSizeInBytes': 4096000000,
             'imagePushedAt': datetime(2017, 3, 3),
             'imageScanStatus': {
                 'status': 'COMPLETE',
