@@ -26,7 +26,7 @@ class Subcommand(click.MultiCommand):
         fn = os.path.join(self.plugin_folder, name + '.py')
         if not os.path.isfile(fn):
             click.echo('Command not found: %s' % name)
-            sys.exit(0)
+            sys.exit(1)
         with open(fn) as f:
             code = compile(f.read(), fn, 'exec')
             eval(code, ns, ns)

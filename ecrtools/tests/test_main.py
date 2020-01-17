@@ -35,3 +35,12 @@ class TestMain(object):
         assert result.exit_code == 1
         expected = 'You must specify a region.\n'
         assert result.output == expected
+
+    def test_command_not_found(self, runner):
+        result = runner.invoke(
+            main.cli,
+            ['missing']
+        )
+        assert result.exit_code == 1
+        expected = 'Command not found: missing\n'
+        assert result.output == expected
