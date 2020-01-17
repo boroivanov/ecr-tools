@@ -104,7 +104,7 @@ list_images_repo02 = {
     ],
 }
 
-describe_images_repo03_empty = {
+list_images_repo03_empty = {
     'imageIds': [
     ],
 }
