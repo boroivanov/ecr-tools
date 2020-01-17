@@ -49,7 +49,6 @@ class Ecr(object):
             },
         }
         images_ids = self.list_images(**params)
-
         if exact_match:
             return [i for i in images_ids
                     if image == i.get('imageTag', '<untagged>')]

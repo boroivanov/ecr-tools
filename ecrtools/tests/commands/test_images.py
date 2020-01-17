@@ -31,8 +31,9 @@ class TestImages(object):
 
         expected_result = '2016-11-02 00:00:00     0.1MB  1.0, master\n' \
             '2017-03-03 00:00:00  4096.0MB  2.0, develop\n' \
-            '2018-10-13 00:00:00  8192.0MB  3.0\n\n' \
-            'images: 3 untagged: 0 total size: 12.3GB\n'
+            '2018-10-13 00:00:00  8192.0MB  3.0\n' \
+            '2019-07-29 00:00:00  6634.0MB  <untagged>\n\n' \
+            'images: 4 untagged: 1 total size: 18.9GB\n'
 
         with stubber:
             result = runner.invoke(main.cli, ['images', 'repo01'], obj=ctx)
@@ -59,8 +60,9 @@ class TestImages(object):
             'repositoryName': 'repo01',
             'imageIds': ids,
         }
-        imageDetails = [i for i in sr.describe_images_repo01['imageDetails']
-                        if 'develop' in i['imageTags']]
+        images = [i for i in sr.describe_images_repo01['imageDetails']
+                  if 'imageTags' in i]
+        imageDetails = [i for i in images if 'develop' in i['imageTags']]
         response = {'imageDetails': imageDetails}
         stubber.add_response('describe_images', response,  expected_params)
 
@@ -73,3 +75,23 @@ class TestImages(object):
 
         assert result.output == expected_result
         assert result.exit_code == 0
+
+    def test_images_list_with_image_not_found(self, runner):
+        expected_params = {
+            'repositoryName': 'repo01',
+            'maxResults': 100,
+            'filter': {
+                'tagStatus': 'ANY'
+            },
+        }
+        stubber.add_response('list_images',
+                             sr.list_images_repo01,  expected_params)
+
+        expected_result = 'No images found.\n'
+
+        with stubber:
+            result = runner.invoke(main.cli, ['images', 'repo01', 'missing'],
+                                   obj=ctx)
+
+        assert result.output == expected_result
+        assert result.exit_code == 1

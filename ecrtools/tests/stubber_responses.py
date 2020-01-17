@@ -174,7 +174,25 @@ describe_images_repo01 = {
                 'findingSeverityCounts': {
                     'string': 123
                 }
-            }
+            },
+        },
+        {
+            'registryId': '123456789123',
+            'repositoryName': 'repo01',
+            'imageDigest': 'sha256:01125a4ccb76d3e281199ea04ee496a560c636f858df617b67e7d971d17a4789',
+            'imageSizeInBytes': 6634000000,
+            'imagePushedAt': datetime(2019, 7, 29),
+            'imageScanStatus': {
+                'status': 'COMPLETE',
+                'description': 'repo01:no_tags'
+            },
+            'imageScanFindingsSummary': {
+                'imageScanCompletedAt': datetime(2019, 7, 29),
+                'vulnerabilitySourceUpdatedAt': datetime(2019, 7, 29),
+                'findingSeverityCounts': {
+                    'string': 123
+                }
+            },
         },
     ],
 }
