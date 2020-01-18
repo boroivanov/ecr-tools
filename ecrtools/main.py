@@ -1,10 +1,10 @@
 import os
+import string
 import sys
+
 import boto3
 import click
-import string
-
-from botocore.exceptions import ProfileNotFound, NoRegionError
+from botocore.exceptions import NoRegionError, ProfileNotFound
 
 version = '0.0.4'
 
@@ -26,7 +26,7 @@ class Subcommand(click.MultiCommand):
         fn = os.path.join(self.plugin_folder, name + '.py')
         if not os.path.isfile(fn):
             click.echo('Command not found: %s' % name)
-            sys.exit(0)
+            sys.exit(1)
         with open(fn) as f:
             code = compile(f.read(), fn, 'exec')
             eval(code, ns, ns)
@@ -52,11 +52,12 @@ def cli(ctx, region, profile):
         click.echo(e, err=True)
         sys.exit(1)
 
-    ctx.obj = {
-        'region': region,
-        'profile': profile,
-        'ecr': ecr,
-    }
+    if not ctx.obj:
+        ctx.obj = {
+            'region': region,
+            'profile': profile,
+            'ecr': ecr,
+        }
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 import sys
+
 import click
 
 from ecrtools.lib.ecr import Ecr
@@ -13,16 +14,22 @@ from ecrtools.lib.utils import convert_bytes
 @click.option('-u', '--units', default='MB',
               type=click.Choice(['B', 'MB', 'GB']), help='Size units.')
 @click.option('-w', '--exact-match', is_flag=True, help='Exact match.')
-@click.pass_context
+@click.pass_obj
 def images(ctx, repo, image, count, units, exact_match):
     '''List images in a repo'''
 
-    ecr = Ecr(ctx.obj['ecr'], repo)
-    image_ids = ecr.get_image_ids(image, exact_match)
-    if not image_ids:
+    ecr = Ecr(ctx['ecr'], repo)
+    if image == '':
+        images = ecr.get_all_repo_images()
+    else:
+        image_ids = ecr.get_image_ids(image, exact_match)
+        if not image_ids:
+            sys.exit('No images found.')
+        images = ecr.get_images(image_ids)
+        images = sorted(images, reverse=True, key=lambda k: k['imagePushedAt'])
+
+    if not images:
         sys.exit('No images found.')
-    images = ecr.get_images(image_ids)
-    images = sorted(images, reverse=True, key=lambda k: k['imagePushedAt'])
 
     total_size = 0
     total_untagged = 0

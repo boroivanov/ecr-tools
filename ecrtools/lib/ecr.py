@@ -1,8 +1,10 @@
-import sys
-import click
 import functools
+import sys
 
+import click
 from botocore.exceptions import ClientError
+
+from ecrtools.lib.utils import split_list
 
 
 def ecr_api_call(key, error_code='RepositoryNotFoundException',
@@ -14,10 +16,10 @@ def ecr_api_call(key, error_code='RepositoryNotFoundException',
             repos = []
             while True:
                 if response:
-                    if 'NextMarker' not in response:
+                    if 'nextToken' not in response:
                         break
                     else:
-                        kwargs['nextToken'] = response['NextMarker']
+                        kwargs['nextToken'] = response['nextToken']
                 try:
                     response = func(*args, **kwargs)
                 except ClientError as e:
@@ -25,8 +27,8 @@ def ecr_api_call(key, error_code='RepositoryNotFoundException',
                         click.echo(error_message, err=True)
                     else:
                         click.echo(e, err=True)
-                    sys.exit(1)
                     click.exit(error_message)
+                    sys.exit(1)
                 repos += response[key]
             return repos
         return wrapper_decorator
@@ -47,7 +49,6 @@ class Ecr(object):
             },
         }
         images_ids = self.list_images(**params)
-
         if exact_match:
             return [i for i in images_ids
                     if image == i.get('imageTag', '<untagged>')]
@@ -55,9 +56,23 @@ class Ecr(object):
                 if image in i.get('imageTag', '<untagged>')]
 
     def get_images(self, images_ids):
+        image_descriptions = []
+        ids_chunks = split_list(images_ids)
+
+        for ids in ids_chunks:
+            # maxResults - This option cannot be used when you specify images
+            # with imageIds.
+            params = {
+                'repositoryName': self.repo,
+                'imageIds': ids,
+            }
+            image_descriptions += self.describe_images(**params)
+
+        return image_descriptions
+
+    def get_all_repo_images(self):
         params = {
             'repositoryName': self.repo,
-            'imageIds': images_ids
         }
         return self.describe_images(**params)
 
