@@ -1,8 +1,9 @@
-from setuptools import setup, find_packages
-
 # read the contents of your README file
 import io
 from os import path
+
+from setuptools import find_packages, setup
+
 this_directory = path.abspath(path.dirname(__file__))
 with io.open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
@@ -10,6 +11,7 @@ with io.open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 requirements = [
     'Click>=6.0',
     'boto3>=1.5.33',
+    'click-spinner>=0.1.8',
 ]
 
 setup(
