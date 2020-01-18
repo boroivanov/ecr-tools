@@ -3,6 +3,7 @@ import sys
 import threading
 
 import click
+import click_spinner
 
 from ecrtools.lib.ecr import Ecr
 from ecrtools.lib.utils import convert_bytes
@@ -30,8 +31,9 @@ def repos(ctx, names, all_stats):
         click.echo('\n'.join(sorted([r['repositoryName'] for r in repos])))
         sys.exit(0)
 
-    stats = bulk_repo_stats(ctx, repos)
-    stats = sorted(stats, key=lambda x: x['repositoryName'])
+    with click_spinner.spinner():
+        stats = bulk_repo_stats(ctx, repos)
+        stats = sorted(stats, key=lambda x: x['repositoryName'])
     print_repo_stats(ctx, stats)
 
 
