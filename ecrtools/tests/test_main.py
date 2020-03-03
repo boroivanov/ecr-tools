@@ -1,6 +1,6 @@
 import ecrtools.main as main
 
-version = '0.0.6'
+version = '0.0.7'
 
 
 class TestMain(object):
